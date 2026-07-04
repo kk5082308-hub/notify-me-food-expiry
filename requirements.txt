@@ -12,4 +12,5 @@ wtforms
 email-validator
 cryptography
 requests
+gunicorn
 
