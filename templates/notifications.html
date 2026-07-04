@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications History - Notify-Me{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+  
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+          <h1 class="font-heading fw-bold mb-1">Notification History</h1>
+          <p class="text-secondary mb-0">Track all automated system alerts and outgoing SMS messages.</p>
+        </div>
+        {% if notifications %}
+          <form action="/notifications/read-all" method="POST">
+            <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-envelope-open"></i> Mark All Read</button>
+          </form>
+        {% endif %}
+      </div>
+
+      <!-- Notification Log History list -->
+      <div class="card glass-card p-4 shadow-sm">
+        <h3 class="h5 font-heading fw-bold mb-4"><i class="bi bi-clock-history"></i> Log History</h3>
+        
+        {% if notifications %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Destination</th>
+                  <th>Message / Title</th>
+                  <th>Delivery Status</th>
+                  <th>Sent At</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for notif in notifications %}
+                  <tr class="{% if not notif.is_read %}table-light fw-bold{% endif %}">
+                    <td>
+                      {% if notif.notification_type == 'sms' %}
+                        <span class="badge bg-info text-dark"><i class="bi bi-chat-left-text-fill"></i> SMS</span>
+                      {% else %}
+                        <span class="badge bg-secondary"><i class="bi bi-cpu-fill"></i> System</span>
+                      {% endif %}
+                    </td>
+                    <td class="small">{{ notif.phone_number or 'System Log' }}</td>
+                    <td>
+                      <div class="fw-semibold text-primary">{{ notif.title }}</div>
+                      <div class="text-secondary small">{{ notif.message }}</div>
+                    </td>
+                    <td>
+                      {% if notif.status == 'sent' %}
+                        <span class="text-success small"><i class="bi bi-check-circle-fill"></i> Sent</span>
+                      {% else %}
+                        <span class="text-danger small" title="Check Twilio settings or caller verification status."><i class="bi bi-exclamation-circle-fill"></i> Failed</span>
+                      {% endif %}
+                    </td>
+                    <td class="text-secondary small">{{ notif.sent_at.strftime('%d-%b-%Y %I:%M %p') }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-5 text-muted">
+            <div class="display-6 mb-2"><i class="bi bi-bell-slash"></i></div>
+            <p class="mb-0">No notification logs recorded yet.</p>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

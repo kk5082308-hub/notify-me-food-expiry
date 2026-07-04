@@ -1,0 +1,15 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-WTF
+APScheduler
+pywebpush
+twilio
+opencv-python-headless
+Pillow
+easyocr
+wtforms
+email-validator
+cryptography
+requests
+

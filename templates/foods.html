@@ -1,0 +1,306 @@
+{% extends 'base.html' %}
+
+{% block title %}My Inventory - Notify-Me{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+
+  <!-- Header -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h1 class="font-heading fw-bold mb-1">Food Inventory</h1>
+      <p class="text-secondary mb-0">Track and manage your registered packaged items.</p>
+    </div>
+    <div>
+      <a href="/foods/add" class="btn btn-premium d-flex align-items-center gap-2">
+        <i class="bi bi-plus-circle"></i> Add Food Item
+      </a>
+    </div>
+  </div>
+
+  <!-- Search, Filter and Sort controls -->
+  <div class="card glass-card p-4 mb-4 shadow-sm">
+    <form method="GET" action="/foods" class="row g-3">
+      <!-- Search Input -->
+      <div class="col-md-4">
+        <label for="search" class="form-label small fw-semibold text-secondary">Search Inventory</label>
+        <div class="input-group">
+          <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control border-start-0" id="search" name="search" value="{{ request.args.get('search', '') }}" placeholder="Search by name, brand, store...">
+        </div>
+      </div>
+      
+      <!-- Expiry Status Filter -->
+      <div class="col-6 col-md-2">
+        <label for="filter_status" class="form-label small fw-semibold text-secondary">Expiry Status</label>
+        <select class="form-select" id="filter_status" name="status">
+          <option value="all" {% if request.args.get('status') == 'all' or not request.args.get('status') %}selected{% endif %}>All Foods</option>
+          <option value="safe" {% if request.args.get('status') == 'safe' %}selected{% endif %}>Safe (>7 Days)</option>
+          <option value="soon" {% if request.args.get('status') == 'soon' %}selected{% endif %}>Expiring Soon</option>
+          <option value="expired" {% if request.args.get('status') == 'expired' %}selected{% endif %}>Expired</option>
+          <option value="consumed" {% if request.args.get('status') == 'consumed' %}selected{% endif %}>Consumed</option>
+        </select>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="col-6 col-md-2">
+        <label for="filter_category" class="form-label small fw-semibold text-secondary">Category</label>
+        <select class="form-select" id="filter_category" name="category">
+          <option value="all">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}" {% if request.args.get('category') == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Sort Selection -->
+      <div class="col-6 col-md-2">
+        <label for="sort_by" class="form-label small fw-semibold text-secondary">Sort By</label>
+        <select class="form-select" id="sort_by" name="sort">
+          <option value="expiry_asc" {% if request.args.get('sort') == 'expiry_asc' or not request.args.get('sort') %}selected{% endif %}>Expiry (Soonest)</option>
+          <option value="expiry_desc" {% if request.args.get('sort') == 'expiry_desc' %}selected{% endif %}>Expiry (Farthest)</option>
+          <option value="newest" {% if request.args.get('sort') == 'newest' %}selected{% endif %}>Newest Added</option>
+          <option value="oldest" {% if request.args.get('sort') == 'oldest' %}selected{% endif %}>Oldest Added</option>
+          <option value="name_asc" {% if request.args.get('sort') == 'name_asc' %}selected{% endif %}>Alphabetical (A-Z)</option>
+        </select>
+      </div>
+      
+      <!-- Filter Trigger -->
+      <div class="col-6 col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-success w-100 py-2"><i class="bi bi-filter"></i> Apply</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Layout Toggle Options -->
+  <div class="d-flex justify-content-end align-items-center mb-3">
+    <div class="btn-group" role="group" aria-label="Layout toggle">
+      <button type="button" class="btn btn-outline-success active" id="btn-grid" title="Grid Layout"><i class="bi bi-grid-fill"></i></button>
+      <button type="button" class="btn btn-outline-success" id="btn-list" title="List/Table Layout"><i class="bi bi-list-task"></i></button>
+    </div>
+  </div>
+
+  <!-- Food Items Layouts -->
+  {% if foods %}
+    
+    <!-- GRID LAYOUT -->
+    <div class="row g-4" id="foods-grid">
+      {% for food in foods %}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="card glass-card h-100">
+            <div class="food-card-img-wrapper">
+              <span class="food-category-badge">{{ food.category }}</span>
+              {% if food.image %}
+                <img src="/static/uploads/foods/{{ food.image }}" class="food-card-img" alt="{{ food.food_name }}" onerror="this.src='/static/img/default_food.png'">
+              {% else %}
+                <img src="/static/img/default_food.png" class="food-card-img" alt="Placeholder">
+              {% endif %}
+            </div>
+            
+            <div class="card-body d-flex flex-column p-3">
+              <h3 class="card-title h6 fw-bold mb-1">{{ food.food_name }}</h3>
+              <p class="text-secondary small mb-2">{{ food.brand or 'Generic' }}</p>
+              
+              <div class="mb-3 mt-auto">
+                <div class="d-flex justify-content-between text-secondary small mb-1">
+                  <span>Quantity:</span>
+                  <span class="fw-semibold">{{ food.quantity }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-secondary small mb-1">
+                  <span>Expiry Date:</span>
+                  <span class="fw-semibold">{{ food.expiry_date.strftime('%d-%b-%Y') }}</span>
+                </div>
+                <div class="text-center mt-2">
+                  <span class="status-badge status-badge-{{ food.status_level }} w-100 justify-content-center">
+                    <i class="bi bi-circle-fill" style="font-size: 0.6rem;"></i>
+                    {{ food.status_label }}
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Actions -->
+              <div class="d-flex gap-1 mt-2">
+                <button type="button" class="btn btn-sm btn-outline-primary flex-fill" data-bs-toggle="modal" data-bs-target="#viewModal{{ food.id }}">
+                  <i class="bi bi-eye"></i> View
+                </button>
+                {% if food.status == 'active' %}
+                  <form action="/foods/consume/{{ food.id }}" method="POST" class="flex-fill d-flex">
+                    <button type="submit" class="btn btn-sm btn-success w-100">
+                      <i class="bi bi-check-circle"></i> Eat
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODAL FOR DETAILED VIEW -->
+        <div class="modal fade" id="viewModal{{ food.id }}" tabindex="-1" aria-labelledby="viewModalLabel{{ food.id }}" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-secondary text-primary border border-secondary rounded-4">
+              <div class="modal-header border-bottom-0 pb-0">
+                <h4 class="modal-title h5 font-heading fw-bold" id="viewModalLabel{{ food.id }}">Food Details</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="text-center mb-3">
+                  {% if food.image %}
+                    <img src="/static/uploads/foods/{{ food.image }}" class="rounded shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;" onerror="this.src='/static/img/default_food.png'">
+                  {% else %}
+                    <img src="/static/img/default_food.png" class="rounded shadow-sm" style="max-height: 200px; width: 100%; object-fit: cover;">
+                  {% endif %}
+                </div>
+                
+                <h3 class="h4 font-heading text-center fw-bold mb-1">{{ food.food_name }}</h3>
+                <p class="text-muted text-center mb-3">{{ food.brand or 'Generic' }} • {{ food.category }}</p>
+                
+                <div class="row g-2 border-top border-bottom py-3 mb-3">
+                  <div class="col-6">
+                    <span class="text-muted small d-block">Quantity</span>
+                    <span class="fw-semibold">{{ food.quantity }}</span>
+                  </div>
+                  <div class="col-6">
+                    <span class="text-muted small d-block">Purchase Store</span>
+                    <span class="fw-semibold">{{ food.store or 'Unspecified' }}</span>
+                  </div>
+                  <div class="col-6">
+                    <span class="text-muted small d-block">Mfg Date</span>
+                    <span class="fw-semibold">{{ food.manufacture_date.strftime('%d-%b-%Y') if food.manufacture_date else 'Unspecified' }}</span>
+                  </div>
+                  <div class="col-6">
+                    <span class="text-muted small d-block">Expiry Date</span>
+                    <span class="fw-semibold text-danger">{{ food.expiry_date.strftime('%d-%b-%Y') }}</span>
+                  </div>
+                  {% if food.barcode %}
+                    <div class="col-12 mt-2">
+                      <span class="text-muted small d-block">Barcode</span>
+                      <span class="fw-semibold"><i class="bi bi-upc"></i> {{ food.barcode }}</span>
+                    </div>
+                  {% endif %}
+                </div>
+
+                {% if food.notes %}
+                  <div class="mb-3">
+                    <span class="text-muted small d-block">Notes</span>
+                    <p class="mb-0 bg-primary p-2 rounded small">{{ food.notes }}</p>
+                  </div>
+                {% endif %}
+                
+                <div class="text-center mb-2">
+                  <span class="status-badge status-badge-{{ food.status_level }} px-4 py-2 justify-content-center">
+                    {{ food.status_label }}
+                  </span>
+                </div>
+              </div>
+              <div class="modal-footer border-top-0 d-flex justify-content-between">
+                <div>
+                  <a href="/foods/edit/{{ food.id }}" class="btn btn-warning btn-sm px-3 rounded-pill"><i class="bi bi-pencil"></i> Edit</a>
+                  <form action="/foods/delete/{{ food.id }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this food item?');">
+                    <button type="submit" class="btn btn-danger btn-sm px-3 rounded-pill"><i class="bi bi-trash"></i> Delete</button>
+                  </form>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- TABLE/LIST LAYOUT (Hidden by default) -->
+    <div class="card glass-card p-3 shadow-sm d-none" id="foods-list">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th scope="col">Image</th>
+              <th scope="col">Product Name</th>
+              <th scope="col">Category</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Expiry Date</th>
+              <th scope="col">Remaining Days</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for food in foods %}
+              <tr>
+                <td>
+                  {% if food.image %}
+                    <img src="/static/uploads/foods/{{ food.image }}" class="rounded" width="40" height="40" style="object-fit: cover;" onerror="this.src='/static/img/default_food.png'">
+                  {% else %}
+                    <img src="/static/img/default_food.png" class="rounded" width="40" height="40" style="object-fit: cover;">
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="fw-bold d-block">{{ food.food_name }}</span>
+                  <small class="text-secondary">{{ food.brand or 'Generic' }}</small>
+                </td>
+                <td><span class="badge bg-secondary">{{ food.category }}</span></td>
+                <td>{{ food.quantity }}</td>
+                <td>{{ food.expiry_date.strftime('%d-%b-%Y') }}</td>
+                <td>
+                  <span class="status-badge status-badge-{{ food.status_level }}">
+                    {{ food.status_label }}
+                  </span>
+                </td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewModal{{ food.id }}"><i class="bi bi-eye"></i></button>
+                    <a href="/foods/edit/{{ food.id }}" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i></a>
+                    {% if food.status == 'active' %}
+                      <form action="/foods/consume/{{ food.id }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-success" title="Mark as Consumed"><i class="bi bi-check-lg"></i></button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="card glass-card text-center p-5 shadow-sm">
+      <div class="display-3 text-muted mb-3"><i class="bi bi-folder-x"></i></div>
+      <h3 class="fw-bold">No food items found</h3>
+      <p class="text-secondary max-width-md mx-auto">
+        Your inventory is empty. Start adding foods manually, scanning barcodes, or uploading receipts to track expiration dates!
+      </p>
+      <a href="/foods/add" class="btn btn-premium mt-3 d-inline-flex align-items-center gap-2 mx-auto">
+        <i class="bi bi-plus-circle"></i> Add Your First Food
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Simple layout switching logic
+  const gridBtn = document.getElementById('btn-grid');
+  const listBtn = document.getElementById('btn-list');
+  const foodsGrid = document.getElementById('foods-grid');
+  const foodsList = document.getElementById('foods-list');
+
+  if (gridBtn && listBtn) {
+    gridBtn.addEventListener('click', () => {
+      gridBtn.classList.add('active');
+      listBtn.classList.remove('active');
+      foodsGrid.classList.remove('d-none');
+      foodsList.classList.add('d-none');
+    });
+
+    listBtn.addEventListener('click', () => {
+      listBtn.classList.add('active');
+      gridBtn.classList.remove('active');
+      foodsList.classList.remove('d-none');
+      foodsGrid.classList.add('d-none');
+    });
+  }
+</script>
+{% endblock %}

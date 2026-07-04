@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Notify-Me{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+      <div class="card glass-card p-4 my-4">
+        <div class="text-center mb-4">
+          <h2 class="font-heading fw-bold">Create Account</h2>
+          <p class="text-secondary">Join Notify-Me and start saving food today</p>
+        </div>
+        
+        <form method="POST" action="/register" onsubmit="return validatePasswords()">
+          <!-- Full Name -->
+          <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-person"></i></span>
+              <input type="text" class="form-control border-start-0" id="name" name="name" required placeholder="John Doe">
+            </div>
+          </div>
+          
+          <!-- Email Address -->
+          <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-envelope"></i></span>
+              <input type="email" class="form-control border-start-0" id="email" name="email" required placeholder="john@example.com">
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="mb-3">
+            <label for="phone" class="form-label">Phone Number (with Country Code)</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-phone"></i></span>
+              <input type="tel" class="form-control border-start-0" id="phone" name="phone" required placeholder="+919876543210">
+            </div>
+            <small class="text-muted">Required for optional Twilio SMS alerts (e.g. +91xxxxxxxxxx)</small>
+          </div>
+          
+          <!-- Password -->
+          <div class="row mb-3">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <label for="password" class="form-label">Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-lock"></i></span>
+                <input type="password" class="form-control border-start-0" id="password" name="password" required placeholder="••••••••">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="confirm_password" class="form-label">Confirm Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-lock-fill"></i></span>
+                <input type="password" class="form-control border-start-0" id="confirm_password" name="confirm_password" required placeholder="••••••••">
+              </div>
+            </div>
+          </div>
+          
+          <div class="alert alert-danger d-none" id="password-error" role="alert">
+            Passwords do not match!
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-premium btn-lg">Register</button>
+          </div>
+        </form>
+        
+        <div class="text-center mt-2">
+          <p class="text-secondary mb-0">Already have an account? <a href="/login" class="text-success fw-bold">Login here</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function validatePasswords() {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
+    const errorDiv = document.getElementById('password-error');
+    
+    if (password !== confirm) {
+      errorDiv.classList.remove('d-none');
+      return false;
+    }
+    errorDiv.classList.add('d-none');
+    return true;
+  }
+</script>
+{% endblock %}

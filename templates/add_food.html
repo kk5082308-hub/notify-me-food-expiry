@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_edit %}Edit Food Item{% else %}Add Food Item{% endif %} - Notify-Me{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+  
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <!-- Back Button -->
+      <a href="/foods" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left"></i> Back to Inventory</a>
+      
+      <h1 class="font-heading fw-bold mb-4">
+        {% if is_edit %}<i class="bi bi-pencil-square text-warning"></i> Edit Food Item{% else %}<i class="bi bi-plus-circle-fill text-success"></i> Add Packaged Food{% endif %}
+      </h1>
+
+      {% if not is_edit %}
+        <!-- Scanner Helpers (Tabs) -->
+        <div class="card glass-card p-3 mb-4 shadow-sm">
+          <div class="nav nav-pills nav-fill" id="scanner-tabs" role="tablist">
+            <button class="nav-link active" id="tab-manual" data-bs-toggle="pill" data-bs-target="#panel-manual" type="button" role="tab">
+              <i class="bi bi-keyboard"></i> Manual Input
+            </button>
+            <button class="nav-link" id="tab-barcode" data-bs-toggle="pill" data-bs-target="#panel-barcode" type="button" role="tab">
+              <i class="bi bi-upc-scan"></i> Barcode Scanner
+            </button>
+            <button class="nav-link" id="tab-receipt" data-bs-toggle="pill" data-bs-target="#panel-receipt" type="button" role="tab">
+              <i class="bi bi-receipt"></i> Scan Receipt (OCR)
+            </button>
+          </div>
+
+          <div class="tab-content mt-3">
+            <!-- MANUAL TAB -->
+            <div class="tab-pane fade show active text-center text-muted p-2" id="panel-manual" role="tabpanel">
+              <p class="mb-0">Fill in the product details using the form below.</p>
+            </div>
+
+            <!-- BARCODE TAB -->
+            <div class="tab-pane fade" id="panel-barcode" role="tabpanel">
+              <div class="row g-3 align-items-center justify-content-center text-center">
+                <div class="col-md-8">
+                  <p class="small text-secondary mb-3">Scan the product's barcode using your camera, or type it manually to fetch details automatically from Open Food Facts.</p>
+                  
+                  <!-- Camera Viewport Container -->
+                  <div id="barcode-scanner-container" class="mb-3 d-none">
+                    <div id="qr-reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+                    <button type="button" class="btn btn-sm btn-danger mt-2" id="btn-stop-barcode"><i class="bi bi-camera-video-off"></i> Stop Camera</button>
+                  </div>
+                  
+                  <div class="d-flex gap-2 justify-content-center mb-3">
+                    <button type="button" class="btn btn-success px-4" id="btn-start-barcode"><i class="bi bi-camera"></i> Scan via Camera</button>
+                  </div>
+                  
+                  <div class="input-group mb-2" style="max-width: 400px; margin: 0 auto;">
+                    <input type="text" class="form-control" id="manual-barcode-input" placeholder="Enter barcode manually (e.g. 8901030932021)">
+                    <button class="btn btn-success" type="button" id="btn-lookup-barcode"><i class="bi bi-search"></i> Lookup</button>
+                  </div>
+                  <div id="barcode-loader" class="spinner-border text-success d-none my-2" role="status"></div>
+                  <div id="barcode-status" class="small mt-1"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- RECEIPT TAB -->
+            <div class="tab-pane fade" id="panel-receipt" role="tabpanel">
+              <div class="text-center p-2">
+                <p class="small text-secondary mb-3">Upload an image of your grocery receipt. We will extract the items and let you import them with one click.</p>
+                
+                <div class="mb-3" style="max-width: 400px; margin: 0 auto;">
+                  <input class="form-control" type="file" id="receipt-upload-input" accept="image/*">
+                </div>
+                
+                <button type="button" class="btn btn-success px-4 mb-3" id="btn-scan-receipt"><i class="bi bi-lightning-charge"></i> Analyze Receipt</button>
+                
+                <!-- OCR Spinner / Progress -->
+                <div id="ocr-loader" class="d-none my-3">
+                  <div class="spinner-border text-success mb-2" role="status"></div>
+                  <p class="small text-muted">Scanning bill image and extracting items... (This may take a moment)</p>
+                </div>
+                
+                <!-- OCR Results Section -->
+                <div id="ocr-results" class="d-none text-start mt-3">
+                  <h5 class="font-heading fw-bold mb-3 border-bottom pb-2">Detected Items</h5>
+                  <div id="ocr-items-list" class="max-height-md overflow-y-auto mb-3" style="max-height: 250px;">
+                    <!-- OCR items injected here -->
+                  </div>
+                  <p class="small text-muted"><i class="bi bi-info-circle"></i> Click the "+" button on any item to fill it in the form below.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- MANUAL ENTRY FORM -->
+      <div class="card glass-card p-4 shadow-sm">
+        <form method="POST" action="{% if is_edit %}/foods/edit/{{ food.id }}{% else %}/foods/add{% endif %}" enctype="multipart/form-data">
+          
+          <div class="row g-3">
+            <!-- Food Name -->
+            <div class="col-md-6">
+              <label for="food_name" class="form-label fw-semibold">Food Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="food_name" name="food_name" value="{{ food.food_name if is_edit else '' }}" required placeholder="e.g. Milk, Brown Bread">
+            </div>
+
+            <!-- Brand -->
+            <div class="col-md-6">
+              <label for="brand" class="form-label fw-semibold">Brand (Optional)</label>
+              <input type="text" class="form-control" id="brand" name="brand" value="{{ food.brand if is_edit else '' }}" placeholder="e.g. Amul, Britannia">
+            </div>
+
+            <!-- Category -->
+            <div class="col-md-6">
+              <label for="category" class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+              <select class="form-select" id="category" name="category" required>
+                <option value="" disabled {% if not is_edit %}selected{% endif %}>Select Category</option>
+                <option value="Dairy" {% if is_edit and food.category == 'Dairy' %}selected{% endif %}>Dairy</option>
+                <option value="Bakery" {% if is_edit and food.category == 'Bakery' %}selected{% endif %}>Bakery</option>
+                <option value="Beverages" {% if is_edit and food.category == 'Beverages' %}selected{% endif %}>Beverages</option>
+                <option value="Snacks" {% if is_edit and food.category == 'Snacks' %}selected{% endif %}>Snacks</option>
+                <option value="Fruits & Vegetables" {% if is_edit and food.category == 'Fruits & Vegetables' %}selected{% endif %}>Fruits & Vegetables</option>
+                <option value="Pantry" {% if is_edit and food.category == 'Pantry' %}selected{% endif %}>Pantry</option>
+                <option value="Meat & Seafood" {% if is_edit and food.category == 'Meat & Seafood' %}selected{% endif %}>Meat & Seafood</option>
+                <option value="Frozen" {% if is_edit and food.category == 'Frozen' %}selected{% endif %}>Frozen</option>
+                <option value="Canned Goods" {% if is_edit and food.category == 'Canned Goods' %}selected{% endif %}>Canned Goods</option>
+                <option value="Other" {% if is_edit and food.category == 'Other' %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+
+            <!-- Quantity -->
+            <div class="col-md-6">
+              <label for="quantity" class="form-label fw-semibold">Quantity / Vol</label>
+              <input type="text" class="form-control" id="quantity" name="quantity" value="{{ food.quantity if is_edit else '1' }}" placeholder="e.g. 500ml, 1 packet, 4 pcs">
+            </div>
+
+            <!-- Mfg Date -->
+            <div class="col-md-6">
+              <label for="manufacture_date" class="form-label fw-semibold">Manufacturing Date</label>
+              <input type="date" class="form-control" id="manufacture_date" name="manufacture_date" value="{{ food.manufacture_date.strftime('%Y-%m-%d') if is_edit and food.manufacture_date else '' }}">
+            </div>
+
+            <!-- Expiry Date -->
+            <div class="col-md-6">
+              <label for="expiry_date" class="form-label fw-semibold">Expiry Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="expiry_date" name="expiry_date" value="{{ food.expiry_date.strftime('%Y-%m-%d') if is_edit else '' }}" required>
+            </div>
+
+            <!-- Store -->
+            <div class="col-md-6">
+              <label for="store" class="form-label fw-semibold">Purchase Store</label>
+              <input type="text" class="form-control" id="store" name="store" value="{{ food.store if is_edit else '' }}" placeholder="e.g. Walmart, DMart">
+            </div>
+
+            <!-- Barcode Hidden/Saved -->
+            <div class="col-md-6">
+              <label for="barcode" class="form-label fw-semibold">Barcode</label>
+              <input type="text" class="form-control" id="barcode" name="barcode" value="{{ food.barcode if is_edit else '' }}" placeholder="e.g. 8901030932021">
+            </div>
+
+            <!-- Food Image -->
+            <div class="col-md-12">
+              <label for="image" class="form-label fw-semibold">Product Image</label>
+              <input class="form-control" type="file" id="image" name="image" accept="image/*" onchange="previewImage(event)">
+              
+              <!-- Image preview wrapper -->
+              <div class="mt-2 text-center">
+                {% if is_edit and food.image %}
+                  <img id="image-preview" src="/static/uploads/foods/{{ food.image }}" class="rounded border shadow-sm d-inline-block" style="max-height: 150px; max-width: 100%; object-fit: cover;">
+                {% else %}
+                  <img id="image-preview" class="rounded border shadow-sm d-none" style="max-height: 150px; max-width: 100%; object-fit: cover;">
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="col-md-12">
+              <label for="notes" class="form-label fw-semibold">Notes</label>
+              <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="e.g. Keep in freezer, consume within 2 days of opening...">{{ food.notes if is_edit else '' }}</textarea>
+            </div>
+            
+            {% if is_edit %}
+              <!-- Status for editing -->
+              <div class="col-md-6">
+                <label for="status" class="form-label fw-semibold">Status</label>
+                <select class="form-select" id="status" name="status">
+                  <option value="active" {% if food.status == 'active' %}selected{% endif %}>Active</option>
+                  <option value="consumed" {% if food.status == 'consumed' %}selected{% endif %}>Consumed</option>
+                  <option value="wasted" {% if food.status == 'wasted' %}selected{% endif %}>Wasted/Expired</option>
+                </select>
+              </div>
+            {% endif %}
+          </div>
+          
+          <div class="d-flex gap-3 mt-4 border-top pt-3">
+            <button type="submit" class="btn btn-premium px-4"><i class="bi bi-save"></i> Save Product</button>
+            <a href="/foods" class="btn btn-outline-secondary px-4">Cancel</a>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Html5-QRCode CDN for camera scanner -->
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+  // Image preview helper
+  function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function() {
+      const output = document.getElementById('image-preview');
+      output.src = reader.result;
+      output.classList.remove('d-none');
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
+
+  // ----------------------------------------------------
+  // Barcode Lookup logic
+  // ----------------------------------------------------
+  const lookupBtn = document.getElementById('btn-lookup-barcode');
+  const barcodeInput = document.getElementById('manual-barcode-input');
+  const barcodeLoader = document.getElementById('barcode-loader');
+  const barcodeStatus = document.getElementById('barcode-status');
+
+  async function performBarcodeLookup(barcode) {
+    if (!barcode) return;
+    
+    barcodeLoader.classList.remove('d-none');
+    barcodeStatus.className = 'small mt-1 text-muted';
+    barcodeStatus.textContent = 'Searching product registry...';
+
+    try {
+      const response = await fetch(`/api/barcode/${barcode}`);
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        // Autofill manual form
+        document.getElementById('food_name').value = data.product.food_name || '';
+        document.getElementById('brand').value = data.product.brand || '';
+        document.getElementById('category').value = data.product.category || 'Other';
+        document.getElementById('quantity').value = data.product.quantity || '1';
+        document.getElementById('store').value = data.product.store || '';
+        document.getElementById('notes').value = data.product.notes || '';
+        document.getElementById('barcode').value = barcode;
+        
+        // Image preview if API returned image URL
+        if (data.product.image_url) {
+          const imgPreview = document.getElementById('image-preview');
+          imgPreview.src = data.product.image_url;
+          imgPreview.classList.remove('d-none');
+          // Add a hidden input to post image url if user does not upload file
+          let urlInput = document.getElementById('image_url_hidden');
+          if (!urlInput) {
+            urlInput = document.createElement('input');
+            urlInput.type = 'hidden';
+            urlInput.id = 'image_url_hidden';
+            urlInput.name = 'image_url_hidden';
+            document.forms[0].appendChild(urlInput);
+          }
+          urlInput.value = data.product.image_url;
+        }
+
+        barcodeStatus.className = 'small mt-1 text-success';
+        barcodeStatus.textContent = `Successfully imported: ${data.product.food_name}! Check the form below.`;
+        
+        // Click manual tab
+        document.getElementById('tab-manual').click();
+      } else {
+        barcodeStatus.className = 'small mt-1 text-danger';
+        barcodeStatus.textContent = 'Product not found in Open Food Facts registry. Please enter details manually.';
+      }
+    } catch (err) {
+      console.error(err);
+      barcodeStatus.className = 'small mt-1 text-danger';
+      barcodeStatus.textContent = 'Error querying product database.';
+    } finally {
+      barcodeLoader.classList.add('d-none');
+    }
+  }
+
+  if (lookupBtn && barcodeInput) {
+    lookupBtn.addEventListener('click', () => {
+      performBarcodeLookup(barcodeInput.value.trim());
+    });
+  }
+
+  // ----------------------------------------------------
+  // HTML5 Barcode Camera Scanner logic
+  // ----------------------------------------------------
+  let html5QrcodeScanner = null;
+  const startCameraBtn = document.getElementById('btn-start-barcode');
+  const stopCameraBtn = document.getElementById('btn-stop-barcode');
+  const scannerContainer = document.getElementById('barcode-scanner-container');
+
+  if (startCameraBtn) {
+    startCameraBtn.addEventListener('click', () => {
+      scannerContainer.classList.remove('d-none');
+      startCameraBtn.classList.add('d-none');
+      
+      html5QrcodeScanner = new Html5Qrcode("qr-reader");
+      
+      const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+      
+      html5QrcodeScanner.start(
+        { facingMode: "environment" }, 
+        config,
+        (decodedText) => {
+          console.log(`Scan result: ${decodedText}`);
+          // Stop camera
+          stopCamera();
+          // Set in input & lookup
+          barcodeInput.value = decodedText;
+          performBarcodeLookup(decodedText);
+        },
+        (errorMessage) => {
+          // ignore scan failures
+        }
+      ).catch((err) => {
+        console.error("Camera startup failed: ", err);
+        barcodeStatus.className = 'small mt-1 text-danger';
+        barcodeStatus.textContent = 'Could not access device camera. Please type the barcode instead.';
+        stopCamera();
+      });
+    });
+  }
+
+  function stopCamera() {
+    if (html5QrcodeScanner) {
+      html5QrcodeScanner.stop().then(() => {
+        html5QrcodeScanner = null;
+        scannerContainer.classList.add('d-none');
+        startCameraBtn.classList.remove('d-none');
+      }).catch((err) => {
+        console.error(err);
+      });
+    }
+  }
+
+  if (stopCameraBtn) {
+    stopCameraBtn.addEventListener('click', stopCamera);
+  }
+
+  // ----------------------------------------------------
+  // Receipt OCR analyze logic
+  // ----------------------------------------------------
+  const scanReceiptBtn = document.getElementById('btn-scan-receipt');
+  const receiptInput = document.getElementById('receipt-upload-input');
+  const ocrLoader = document.getElementById('ocr-loader');
+  const ocrResults = document.getElementById('ocr-results');
+  const ocrItemsList = document.getElementById('ocr-items-list');
+
+  if (scanReceiptBtn && receiptInput) {
+    scanReceiptBtn.addEventListener('click', async () => {
+      if (receiptInput.files.length === 0) {
+        alert('Please select a receipt image file to analyze first.');
+        return;
+      }
+      
+      ocrLoader.classList.remove('d-none');
+      ocrResults.classList.add('d-none');
+      ocrItemsList.innerHTML = '';
+      
+      const formData = new FormData();
+      formData.append('receipt', receiptInput.files[0]);
+
+      try {
+        const response = await fetch('/api/ocr', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success && data.items.length > 0) {
+          ocrLoader.classList.add('d-none');
+          ocrResults.classList.remove('d-none');
+          
+          data.items.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'ocr-import-item fade-in';
+            div.innerHTML = `
+              <div>
+                <strong class="d-block">${item.food_name}</strong>
+                <small class="text-secondary">${item.brand ? 'Brand: ' + item.brand + ' • ' : ''}Qty: ${item.quantity} • Cat: ${item.category}</small>
+              </div>
+              <button type="button" class="btn btn-sm btn-success rounded-circle px-2" onclick='importOcrItem(${JSON.stringify(item)})'>
+                <i class="bi bi-plus-lg"></i>
+              </button>
+            `;
+            ocrItemsList.appendChild(div);
+          });
+        } else {
+          ocrLoader.classList.add('d-none');
+          alert('Could not detect any food items in the receipt. Please try another image or input manually.');
+        }
+      } catch (err) {
+        console.error(err);
+        ocrLoader.classList.add('d-none');
+        alert('Error processing OCR request on server.');
+      }
+    });
+  }
+
+  // Globally accessible import function
+  window.importOcrItem = function(item) {
+    document.getElementById('food_name').value = item.food_name || '';
+    document.getElementById('brand').value = item.brand || '';
+    document.getElementById('category').value = item.category || 'Other';
+    document.getElementById('quantity').value = item.quantity || '1';
+    
+    // Auto estimate expiry date to 7 days from now as a default helper
+    const today = new Date();
+    today.setDate(today.getDate() + 7);
+    document.getElementById('expiry_date').value = today.toISOString().split('T')[0];
+
+    // Select manual entry tab
+    document.getElementById('tab-manual').click();
+    
+    // Scroll down to form
+    document.getElementById('food_name').scrollIntoView({ behavior: 'smooth' });
+  };
+</script>
+{% endblock %}

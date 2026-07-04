@@ -1,0 +1,25 @@
+{
+  "name": "Notify-Me for Packaged Food",
+  "short_name": "Notify-Me",
+  "description": "Reduce food waste by tracking packaged food expiry dates and sending reminders.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0d1b2a",
+  "theme_color": "#2ecc71",
+  "icons": [
+    {
+      "src": "/static/img/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/img/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

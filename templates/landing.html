@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Notify-Me - Smart Packaged Food Expiry Tracker{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+  
+  <!-- Hero Section -->
+  <header class="hero-section text-center text-md-start">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-6 mb-5 mb-md-0">
+          <h1 class="display-3 font-heading fw-bold mb-3 text-success">
+            Stop Food Waste, <span class="text-primary">Save Money.</span>
+          </h1>
+          <p class="lead text-secondary mb-4">
+            Notify-Me helps you track your packaged food items, scans grocery receipts automatically, and notifies you directly on your phone before they expire.
+          </p>
+          <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
+            {% if current_user.is_authenticated %}
+              <a href="/dashboard" class="btn btn-premium btn-lg">Go to Dashboard</a>
+              <a href="/foods" class="btn btn-outline-secondary btn-lg border-2">My Inventory</a>
+            {% else %}
+              <a href="/register" class="btn btn-premium btn-lg">Get Started Free</a>
+              <a href="/login" class="btn btn-outline-success btn-lg border-2">Login</a>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-md-6 text-center">
+          <!-- SVG Illustration: Green Fridge and Phone notification -->
+          <svg class="img-fluid" width="450" height="350" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background Circles -->
+            <circle cx="250" cy="200" r="160" fill="rgba(46, 204, 113, 0.08)" />
+            <circle cx="350" cy="120" r="70" fill="rgba(5, 150, 105, 0.05)" />
+            
+            <!-- Smart Phone body -->
+            <rect x="290" y="80" width="130" height="260" rx="20" ry="20" fill="#2c3e50" />
+            <rect x="300" y="95" width="110" height="230" rx="10" ry="10" fill="#ecf0f1" />
+            <circle cx="355" cy="310" r="8" fill="#bdc3c7" />
+            <rect x="335" y="86" width="40" height="4" rx="2" fill="#7f8c8d" />
+            
+            <!-- Mobile Screen App View -->
+            <rect x="305" y="105" width="100" height="60" rx="8" fill="#2ecc71" />
+            <text x="355" y="140" fill="#ffffff" font-size="12" font-family="'Outfit', sans-serif" font-weight="bold" text-anchor="middle">Notify-Me</text>
+            
+            <!-- Push Notification Card popping out -->
+            <g transform="translate(180, 170)">
+              <rect x="0" y="0" width="180" height="75" rx="10" fill="#ffffff" filter="drop-shadow(0px 8px 16px rgba(0,0,0,0.15))" />
+              <!-- Top Green Border -->
+              <rect x="0" y="0" width="180" height="6" rx="3" fill="#2ecc71" />
+              <!-- Notification Icon -->
+              <circle cx="25" cy="38" r="12" fill="#e74c3c" />
+              <path d="M22,34 L28,34 L27,37 L23,37 Z" fill="#ffffff" />
+              <circle cx="25" cy="42" r="2" fill="#ffffff" />
+              <!-- Text -->
+              <text x="48" y="32" fill="#2c3e50" font-size="10" font-family="'Inter', sans-serif" font-weight="bold">Amul Milk Expires Tomorrow!</text>
+              <text x="48" y="47" fill="#7f8c8d" font-size="8" font-family="'Inter', sans-serif">Please consume it to avoid waste.</text>
+              <text x="48" y="59" fill="#2ecc71" font-size="7" font-family="'Inter', sans-serif" font-weight="bold">Tap to mark consumed</text>
+            </g>
+
+            <!-- Food Items Box on left -->
+            <g transform="translate(60, 100)">
+              <rect x="0" y="40" width="160" height="150" rx="15" fill="#1b263b" />
+              <!-- Shelves -->
+              <line x1="10" y1="90" x2="150" y2="90" stroke="#2e3b4e" stroke-width="4" />
+              <line x1="10" y1="140" x2="150" y2="140" stroke="#2e3b4e" stroke-width="4" />
+              
+              <!-- Milk Carton -->
+              <rect x="25" y="55" width="25" height="30" fill="#ecf0f1" rx="2" />
+              <path d="M25,55 L37.5,45 L50,55 Z" fill="#3498db" />
+              <rect x="30" y="65" width="15" height="15" fill="#2ecc71" />
+              
+              <!-- Apple -->
+              <circle cx="105" cy="125" r="12" fill="#e74c3c" />
+              <path d="M103,113 Q105,108 108,111" fill="none" stroke="#27ae60" stroke-width="2" />
+              
+              <!-- Soda Can -->
+              <rect x="115" y="55" width="20" height="30" fill="#e67e22" rx="4" />
+              <rect x="120" y="62" width="10" height="16" fill="#f1c40f" />
+              
+              <!-- Bread Bread -->
+              <rect x="25" y="105" width="50" height="30" fill="#f39c12" rx="6" />
+              <rect x="30" y="108" width="40" height="24" fill="#f1c40f" rx="4" />
+              
+              <!-- Safe Badges -->
+              <rect x="95" y="152" width="45" height="18" rx="9" fill="#27ae60" />
+              <text x="117" y="164" fill="#ffffff" font-size="8" font-weight="bold" text-anchor="middle">SAFE</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Features Section -->
+  <section id="features" class="py-5 bg-tertiary">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="font-heading display-5 fw-bold">Features Built for <span class="text-success">Efficiency</span></h2>
+        <p class="text-secondary lead">Notify-Me simplifies food management using modern visual helpers and PWA technologies.</p>
+      </div>
+      
+      <div class="row g-4">
+        <!-- Feature 1: Receipt Scan -->
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm glass-card p-4 text-center">
+            <div class="display-4 text-success mb-3">
+              <i class="bi bi-receipt-cutoff"></i>
+            </div>
+            <h3 class="h4 font-heading mb-2">OCR Receipt Scanner</h3>
+            <p class="text-secondary mb-0">
+              Upload a picture of your grocery bill. Our integrated EasyOCR engine extracts items, quantities, and brands automatically to autofill logs.
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature 2: Barcode Lookup -->
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm glass-card p-4 text-center">
+            <div class="display-4 text-success mb-3">
+              <i class="bi bi-upc-scan"></i>
+            </div>
+            <h3 class="h4 font-heading mb-2">Barcode Scanner</h3>
+            <p class="text-secondary mb-0">
+              Scan product barcodes using your mobile camera. We fetch details instantly from the Open Food Facts API to speed up entry.
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature 3: Web Push Notifications -->
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm glass-card p-4 text-center">
+            <div class="display-4 text-success mb-3">
+              <i class="bi bi-bell-fill"></i>
+            </div>
+            <h3 class="h4 font-heading mb-2">PWA Push Alerts</h3>
+            <p class="text-secondary mb-0">
+              Works like a native application! Install the website to your home screen and receive instant warning notifications even when the browser is closed.
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature 4: Expiry Color Badges -->
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm glass-card p-4 text-center">
+            <div class="display-4 text-success mb-3">
+              <i class="bi bi-palette-fill"></i>
+            </div>
+            <h3 class="h4 font-heading mb-2">Visual Color Codes</h3>
+            <p class="text-secondary mb-0">
+              Instantly recognize critical products. Color markers shift from Green (safe), Yellow/Orange (due soon) to Red (expired).
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature 5: Analytics Charts -->
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm glass-card p-4 text-center">
+            <div class="display-4 text-success mb-3">
+              <i class="bi bi-pie-chart-fill"></i>
+            </div>
+            <h3 class="h4 font-heading mb-2">Waste Analytics</h3>
+            <p class="text-secondary mb-0">
+              Track category distributions, safe vs. wasted ratios, and monthly consumption timelines using premium Chart.js animations.
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature 6: Dark Mode -->
+        <div class="col-md-4">
+          <div class="card h-100 border-0 shadow-sm glass-card p-4 text-center">
+            <div class="display-4 text-success mb-3">
+              <i class="bi bi-moon-stars-fill"></i>
+            </div>
+            <h3 class="h4 font-heading mb-2">Modern Dark Mode</h3>
+            <p class="text-secondary mb-0">
+              Easy on your eyes. Full support for customizable light and dark styling tokens that match your system preferences.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="font-heading display-5 fw-bold">How It Works</h2>
+        <p class="text-secondary lead">Follow these simple steps to eliminate packaged food waste.</p>
+      </div>
+
+      <div class="row align-items-center">
+        <div class="col-md-4 text-center mb-4 mb-md-0">
+          <div class="p-3">
+            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: 700;">1</div>
+            <h4 class="font-heading fw-bold">Register & Install</h4>
+            <p class="text-secondary">Create a free account and choose "Add to Home Screen" to install the app on your mobile device.</p>
+          </div>
+        </div>
+        <div class="col-md-4 text-center mb-4 mb-md-0">
+          <div class="p-3">
+            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: 700;">2</div>
+            <h4 class="font-heading fw-bold">Log Your Groceries</h4>
+            <p class="text-secondary">Quickly enter foods using receipt scanning, manual input, or camera-based barcode lookups.</p>
+          </div>
+        </div>
+        <div class="col-md-4 text-center">
+          <div class="p-3">
+            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px; font-size: 1.5rem; font-weight: 700;">3</div>
+            <h4 class="font-heading fw-bold">Receive Expiry Alerts</h4>
+            <p class="text-secondary">Get push alerts on your phone at 7, 3, 1 days before expiry, and consume foods on schedule!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-5 bg-success text-white text-center">
+    <div class="container">
+      <h2 class="font-heading display-6 fw-bold mb-3">Ready to reduce your household food waste?</h2>
+      <p class="lead mb-4">Start tracking your food items and receive push notifications on your phone today.</p>
+      {% if current_user.is_authenticated %}
+        <a href="/dashboard" class="btn btn-light text-success btn-lg fw-bold px-4 rounded-pill">Go to Dashboard</a>
+      {% else %}
+        <a href="/register" class="btn btn-light text-success btn-lg fw-bold px-4 rounded-pill">Sign Up Now</a>
+      {% endif %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}

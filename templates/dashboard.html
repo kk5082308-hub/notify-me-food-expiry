@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Notify-Me{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+  
+  <!-- Welcome and Title -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="font-heading fw-bold mb-1">Hello, {{ current_user.name }}!</h1>
+      <p class="text-secondary mb-0">Track your packaged food inventory and SMS alert dispatches.</p>
+    </div>
+    <div class="mt-2 mt-md-0 d-flex gap-2">
+      <a href="/foods/add" class="btn btn-premium d-flex align-items-center gap-2">
+        <i class="bi bi-plus-circle"></i> Add Food Item
+      </a>
+      <a href="/foods" class="btn btn-outline-success d-flex align-items-center gap-2">
+        <i class="bi bi-list"></i> View All
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="row g-3 mb-4">
+    <!-- Total Foods -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card glass-card text-center p-3 h-100">
+        <div class="display-6 text-primary mb-1"><i class="bi bi-box-seam"></i></div>
+        <div class="h3 fw-bold mb-0 text-primary">{{ stats.total }}</div>
+        <div class="text-secondary small">Total Foods</div>
+      </div>
+    </div>
+    
+    <!-- Expiring Today -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card glass-card text-center p-3 h-100 border-danger">
+        <div class="display-6 text-danger mb-1"><i class="bi bi-exclamation-octagon-fill"></i></div>
+        <div class="h3 fw-bold mb-0 text-danger">{{ stats.today }}</div>
+        <div class="text-secondary small">Expiring Today</div>
+      </div>
+    </div>
+    
+    <!-- Expiring Tomorrow -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card glass-card text-center p-3 h-100" style="border-color: var(--color-orange);">
+        <div class="display-6 mb-1" style="color: var(--color-orange);"><i class="bi bi-clock-fill"></i></div>
+        <div class="h3 fw-bold mb-0" style="color: var(--color-orange);">{{ stats.tomorrow }}</div>
+        <div class="text-secondary small">Expiring Tomorrow</div>
+      </div>
+    </div>
+    
+    <!-- Expired -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card glass-card text-center p-3 h-100" style="border-color: var(--color-red);">
+        <div class="display-6 text-danger mb-1"><i class="bi bi-x-circle-fill"></i></div>
+        <div class="h3 fw-bold mb-0 text-danger">{{ stats.expired }}</div>
+        <div class="text-secondary small">Expired Foods</div>
+      </div>
+    </div>
+    
+    <!-- Safe Foods -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card glass-card text-center p-3 h-100 border-success">
+        <div class="display-6 text-success mb-1"><i class="bi bi-check-circle-fill"></i></div>
+        <div class="h3 fw-bold mb-0 text-success">{{ stats.safe }}</div>
+        <div class="text-secondary small">Safe Foods</div>
+      </div>
+    </div>
+
+    <!-- Unread Notifications -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="card glass-card text-center p-3 h-100">
+        <div class="display-6 text-warning mb-1"><i class="bi bi-bell-fill"></i></div>
+        <div class="h3 fw-bold mb-0 text-warning">{{ stats.unread_notifications }}</div>
+        <div class="text-secondary small">Unread Alerts</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Urgent Action Panel -->
+  {% if urgent_foods %}
+    <div class="card glass-card border-danger p-4 mb-4">
+      <h3 class="h5 font-heading text-danger fw-bold mb-3 d-flex align-items-center gap-2">
+        <i class="bi bi-exclamation-triangle-fill"></i> Attention Required: Urgent Expiring Items
+      </h3>
+      <div class="row g-3">
+        {% for food in urgent_foods %}
+          <div class="col-md-6">
+            <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-secondary">
+              <div class="d-flex align-items-center gap-3">
+                {% if food.image %}
+                  <img src="/static/uploads/foods/{{ food.image }}" alt="Food" class="rounded" width="50" height="50" style="object-fit: cover;">
+                {% else %}
+                  <img src="/static/img/default_food.png" alt="Food" class="rounded" width="50" height="50" style="object-fit: cover;">
+                {% endif %}
+                <div>
+                  <h4 class="h6 mb-1 fw-bold">{{ food.food_name }}</h4>
+                  <span class="status-badge status-badge-{{ food.status_level }}">
+                    {{ food.status_label }}
+                  </span>
+                </div>
+              </div>
+              <form action="/foods/consume/{{ food.id }}" method="POST">
+                <button type="submit" class="btn btn-sm btn-success px-3 rounded-pill">Eat</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Charts Block -->
+  <div class="row g-4 mb-4">
+    <!-- Chart 1: Food by Category -->
+    <div class="col-md-4">
+      <div class="card glass-card p-4 h-100">
+        <h3 class="h5 font-heading fw-bold mb-3">Foods by Category</h3>
+        <div class="chart-container">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Chart 2: Expiry Status Ratio -->
+    <div class="col-md-4">
+      <div class="card glass-card p-4 h-100">
+        <h3 class="h5 font-heading fw-bold mb-3">Expired vs Safe Foods</h3>
+        <div class="chart-container">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 3: Expiry Timeline -->
+    <div class="col-md-4">
+      <div class="card glass-card p-4 h-100">
+        <h3 class="h5 font-heading fw-bold mb-3">Expiry Timeline</h3>
+        <div class="chart-container">
+          <canvas id="timelineChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent SMS History Panel -->
+  <div class="card glass-card p-4 mb-4 shadow-sm border-info">
+    <h3 class="h5 font-heading text-info fw-bold mb-3 d-flex align-items-center gap-2">
+      <i class="bi bi-chat-left-text-fill"></i> Recent SMS Notification History
+    </h3>
+    
+    {% if recent_sms %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Recipient Phone</th>
+              <th>Alert Title</th>
+              <th>SMS Message Preview</th>
+              <th>Delivery Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sms in recent_sms %}
+              <tr>
+                <td class="text-secondary small">{{ sms.sent_at.strftime('%d-%b-%Y %I:%M %p') }}</td>
+                <td class="fw-semibold small">{{ sms.phone_number }}</td>
+                <td class="small">{{ sms.title }}</td>
+                <td class="text-secondary small" style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  {{ sms.message }}
+                </td>
+                <td>
+                  {% if sms.status == 'sent' %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Sent</span>
+                  {% else %}
+                    <span class="badge bg-danger" title="Verify Twilio setup and Phone number caller ID settings in Trial Mode."><i class="bi bi-x-circle-fill"></i> Failed</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-4 text-muted">
+        <div class="display-6 mb-2"><i class="bi bi-chat-right-quote"></i></div>
+        <p class="mb-0">No SMS alerts dispatched yet. SMS are sent automatically when items expiring TODAY or TOMORROW are added, or during the hourly scheduler runs.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // Parse data injected from flask
+  const categoryData = {{ charts.categories | tojson }};
+  const statusData = {{ charts.status | tojson }};
+  const timelineData = {{ charts.timeline | tojson }};
+
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: {
+          color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').strip || '#0f172a'
+        }
+      }
+    }
+  };
+
+  // 1. Category Chart (Doughnut)
+  const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+  new Chart(ctxCategory, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(categoryData),
+      datasets: [{
+        data: Object.values(categoryData),
+        backgroundColor: [
+          '#2ecc71', '#3498db', '#f1c40f', '#e67e22', 
+          '#e74c3c', '#9b59b6', '#1abc9c', '#34495e'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: commonOptions
+  });
+
+  // 2. Status Chart (Pie)
+  const ctxStatus = document.getElementById('statusChart').getContext('2d');
+  new Chart(ctxStatus, {
+    type: 'pie',
+    data: {
+      labels: ['Safe Foods', 'Consumed', 'Expired/Wasted'],
+      datasets: [{
+        data: [
+          {{ stats.safe }},
+          {{ stats.consumed }},
+          {{ stats.expired }}
+        ],
+        backgroundColor: ['#2ecc71', '#3498db', '#e74c3c'],
+        borderWidth: 1
+      }]
+    },
+    options: commonOptions
+  });
+
+  // 3. Timeline Chart (Bar)
+  const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
+  new Chart(ctxTimeline, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(timelineData),
+      datasets: [{
+        label: 'Number of Items',
+        data: Object.values(timelineData),
+        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+        borderColor: '#2ecc71',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      ...commonOptions,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

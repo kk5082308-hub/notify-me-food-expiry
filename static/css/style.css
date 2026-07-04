@@ -1,0 +1,354 @@
+/* Import Modern Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+/* CSS Custom Properties / Color System */
+:root {
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  
+  /* Color Palette - Premium Green Theme */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  
+  --primary-green: #2ecc71;
+  --primary-hover: #27ae60;
+  --primary-glow: rgba(46, 204, 113, 0.25);
+  
+  --accent-emerald: #059669;
+  --border-color: #e2e8f0;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --shadow-premium: 0 20px 25px -5px rgba(46, 204, 113, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Expiry colors */
+  --color-green: #2ecc71;
+  --color-yellow: #f1c40f;
+  --color-orange: #e67e22;
+  --color-red: #e74c3c;
+  
+  --card-blur: blur(8px);
+}
+
+/* Dark Mode Overrides */
+[data-bs-theme="dark"] {
+  --bg-primary: #0d1b2a;
+  --bg-secondary: #1b263b;
+  --bg-tertiary: #111a2e;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  
+  --border-color: #2e3b4e;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+  --shadow-premium: 0 20px 25px -5px rgba(46, 204, 113, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Global Styles */
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+/* Custom Nav Styling */
+.navbar-premium {
+  background-color: rgba(27, 38, 59, 0.9) !important;
+  backdrop-filter: var(--card-blur);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.8rem 1.5rem;
+}
+
+[data-bs-theme="light"] .navbar-premium {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: var(--card-blur);
+  -webkit-backdrop-filter: var(--card-blur);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+[data-bs-theme="dark"] .glass-card {
+  background: rgba(27, 38, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-premium);
+}
+
+/* Premium Gradient Button */
+.btn-premium {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--accent-emerald) 100%);
+  border: none;
+  color: #ffffff;
+  font-weight: 500;
+  border-radius: 12px;
+  padding: 0.6rem 1.5rem;
+  box-shadow: 0 4px 10px var(--primary-glow);
+  transition: all 0.3s ease;
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px var(--primary-glow);
+  opacity: 0.95;
+  color: #ffffff;
+}
+
+.btn-premium:active {
+  transform: translateY(0);
+}
+
+/* Form Controls Styling */
+.form-control, .form-select {
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.6rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 0.25rem var(--primary-glow);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Status Indicator Dots and Badges */
+.status-badge {
+  padding: 0.4em 0.8em;
+  font-weight: 600;
+  font-size: 0.75rem;
+  border-radius: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.status-badge-green {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: var(--color-green);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.status-badge-yellow {
+  background-color: rgba(241, 196, 15, 0.15);
+  color: #d4ac0d;
+  border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+[data-bs-theme="dark"] .status-badge-yellow {
+  color: var(--color-yellow);
+}
+
+.status-badge-orange {
+  background-color: rgba(230, 126, 34, 0.15);
+  color: var(--color-orange);
+  border: 1px solid rgba(230, 126, 34, 0.3);
+}
+
+.status-badge-red {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: var(--color-red);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.status-badge-safe {
+  background-color: rgba(52, 152, 219, 0.15);
+  color: #3498db;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+/* Food Cards & Food Listing Grid */
+.food-card-img-wrapper {
+  position: relative;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+}
+
+.food-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.glass-card:hover .food-card-img {
+  transform: scale(1.08);
+}
+
+.food-category-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  font-size: 0.7rem;
+  padding: 0.3em 0.6em;
+  border-radius: 4px;
+}
+
+/* Chart Container styling */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 300px;
+}
+
+/* Hero Section of Landing Page */
+.hero-section {
+  background: radial-gradient(circle at 10% 20%, rgba(46, 204, 113, 0.15) 0%, transparent 45%),
+              radial-gradient(circle at 90% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 40%);
+  padding: 6rem 0;
+}
+
+/* Dark Mode Icon Toggle */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* Dynamic CSS Transitions and Keyframe Animations */
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+  z-index: 1030;
+  padding: 0.4rem 0;
+}
+
+.mobile-bottom-nav-item {
+  flex: 1;
+  text-align: center;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.mobile-bottom-nav-item i {
+  font-size: 1.25rem;
+  transition: transform 0.2s ease;
+}
+
+.mobile-bottom-nav-item.active {
+  color: var(--primary-green);
+  font-weight: 600;
+}
+
+.mobile-bottom-nav-item.active i {
+  transform: translateY(-2px);
+}
+
+/* Responsive adjustment for Mobile view */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 70px; /* Make space for mobile bottom nav */
+  }
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  .desktop-nav {
+    display: none !important;
+  }
+  .hero-section {
+    padding: 3rem 0;
+  }
+}
+
+/* Receipt OCR Item importer cards */
+.ocr-import-item {
+  background-color: var(--bg-tertiary);
+  border-radius: 10px;
+  padding: 0.8rem;
+  margin-bottom: 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Scanner viewport frame */
+#qr-reader {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--primary-green) !important;
+}
+
+/* Profile Picture Wrapper */
+.profile-pic-container {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+}
+
+.profile-pic-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--primary-green);
+}
