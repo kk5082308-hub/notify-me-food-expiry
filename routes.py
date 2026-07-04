@@ -21,11 +21,26 @@ def allowed_file(filename):
 
 def validate_phone_number(phone):
     """
-    Validates E.164 phone number format (e.g. +919876543210 or +1234567890).
-    Requires a leading plus sign followed by 10 to 15 digits.
+    Validates phone number format.
+    Requires a country code prefix (e.g., +91 for India, +1 for US)
+    followed by exactly 10 subscriber digits.
     """
-    pattern = r'^\+[1-9]\d{9,14}$'
-    return re.match(pattern, phone) is not None
+    # Remove spacing and formatting dashes
+    phone = phone.replace(" ", "").replace("-", "")
+    
+    # Must start with '+' followed by 11 to 14 digits total
+    if not re.match(r'^\+[1-9]\d{10,14}$', phone):
+        return False
+        
+    # Enforce exactly 10 subscriber digits for India (+91)
+    if phone.startswith('+91'):
+        return len(phone) == 13  # + (1) + 91 (2) + 10 digits = 13 characters
+        
+    # Enforce exactly 10 subscriber digits for US/Canada (+1)
+    if phone.startswith('+1'):
+        return len(phone) == 12  # + (1) + 1 (1) + 10 digits = 12 characters
+        
+    return True
 
 # ----------------------------------------------------
 # PWA Static Assets Helper Routes
