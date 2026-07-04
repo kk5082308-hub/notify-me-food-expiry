@@ -35,15 +35,23 @@ def create_app():
     with app.app_context():
         try:
             from sqlalchemy import text
-            # Inspect table columns in SQLite
+            # Inspect table columns in SQLite for notifications
             res = db.session.execute(text("PRAGMA table_info(notifications)")).fetchall()
             cols = [col[1] for col in res]
             if len(cols) > 0 and 'notification_type' not in cols:
                 db.session.execute(text("DROP TABLE notifications"))
                 db.session.commit()
                 print("Successfully dropped old notifications table for restructuring.")
+                
+            # Inspect table columns in SQLite for users (add phone if missing)
+            res_users = db.session.execute(text("PRAGMA table_info(users)")).fetchall()
+            cols_users = [col[1] for col in res_users]
+            if len(cols_users) > 0 and 'phone' not in cols_users:
+                db.session.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR(20) DEFAULT ''"))
+                db.session.commit()
+                print("Successfully added 'phone' column to users table.")
         except Exception as e:
-            print(f"Error during notifications table drop check: {e}")
+            print(f"Error during database migration checks: {e}")
             db.session.rollback()
 
         # Recreate tables (creates new notifications layout if dropped)
